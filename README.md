@@ -7,6 +7,11 @@ Load the library:
 library(ggplot2)
 ```
 
+Load the data:
+```{r, echo=TRUE}
+load("/Users/sm3466/Dropbox (YSE)/Teaching/Workshops/DataBasics/DataBasics.RDATA")
+```
+
 ### Building blocks of layers with the grammar of graphics:
 - Data: The element is the data set itself
 - Aesthetics: The data is to map onto the Aesthetics attributes such as x-axis, y-axis, color, fill, size, labels, alpha, shape, line width, line type
@@ -20,49 +25,51 @@ library(ggplot2)
 We first need to define the source of the information to be visualized.
 
 ```{r, echo=TRUE}
-ggplot(data = mtcars) +  labs(title = "MTCars Data Plot")
+ggplot(data = Yale.Myers.sub) + 
+ labs(title = "Climate of Yale Myers Forest")
+
 ```
 ### Aesthetic Layer:
 mapping ... display and map dataset into certain aesthetics.
 
 ```{r, echo=TRUE}
-ggplot(data = mtcars, aes(x = hp, y = mpg, col = disp))+
- labs(title = "MTCars Data Plot")
+ggplot(data = Yale.Myers.sub, aes(x = date , y = tmean)) +
+  labs(title = "Climate of Yale Myers Forest")
  ```
 ### Geometric layer:
 ggplot2 in R geometric layer control the essential elements, see how our data being displayed using point, line, histogram, bar, boxplot.
 
 ```{r, echo=TRUE}
-ggplot(data = mtcars, aes(x = hp, y = mpg, col = disp)) +
-  geom_point() +
+ggplot(data = Yale.Myers.sub, aes(x = date , y = tmean))+
+   geom_point() +
   labs(title = "Miles per Gallon vs Horsepower",
-       x = "Horsepower",
-       y = "Miles per Gallon")
+       x = "Date",
+       y = "Mean Air Temperature (Degrees Celcius)")
 ```
 
 Geometric layer: Adding Size, color, and shape and then plotting the Histogram plot
 
 ```{r, echo=TRUE}
 # Adding size
-ggplot(data = mtcars, aes(x = hp, y = mpg, size = disp)) +
+ggplot(data = Yale.Myers.sub, aes(x = date , y = tmean, size=year))+
   geom_point() +
-  labs(title = "Miles per Gallon vs Horsepower",
-       x = "Horsepower",
-       y = "Miles per Gallon")
- 
+  labs(title = 'Climate of Yale Myers Forest',
+       x = "Date",
+       y = "Mean Air Temperature (Degrees Celcius)")
+       
 # Adding shape and color
-ggplot(data = mtcars, aes(x = hp, y = mpg, col = factor(cyl),
-       shape = factor(am))) +geom_point() +
-  labs(title = "Miles per Gallon vs Horsepower",
-       x = "Horsepower",
-       y = "Miles per Gallon")
+ggplot(data = Yale.Myers.sub, aes(x = date , y = tmean, col=month))+
+  geom_point() +
+  labs(title = 'Climate of Yale Myers Forest',
+       x = "Date",
+       y = "Mean Air Temperature (Degrees Celcius)")
  
 # Histogram plot
-ggplot(data = mtcars, aes(x = hp)) +
+ggplot(data =  Yale.Myers.sub, aes(x = tmean)) +
   geom_histogram(binwidth = 5) +
-  labs(title = "Histogram of Horsepower",
-       x = "Horsepower",
-       y = "Count")
+  labs(title = 'Climate of Yale Myers Forest',
+       x = "Mean Air Temperature (Degrees Celcius)",
+       y = "Count" )
 ```
 
 ### Facet Layer:
@@ -70,63 +77,64 @@ ggplot2 in R facet layer is used to split the data up into subsets of the entire
 
 ```{r, echo=TRUE}
 # Facet Layer
-# Separate rows according to transmission type
-p <- ggplot(data = mtcars, aes(x = hp, y = mpg, shape = factor(cyl))) + geom_point()
- 
-p + facet_grid(am ~ .) +
-  labs(title = "Miles per Gallon vs Horsepower",
-       x = "Horsepower",
-       y = "Miles per Gallon")
- 
-# Separate columns according to cylinders
-p <- ggplot(data = mtcars, aes(x = hp, y = mpg, shape = factor(cyl))) + geom_point()
- 
-p + facet_grid(. ~ cyl) +
-  labs(title = "Miles per Gallon vs Horsepower",
-       x = "Horsepower",
-       y = "Miles per Gallon")
+# Separate plot according to month
+
+# Subset dataset to indlude only months 9-11
+Yale.Myers.fall <- Yale.Myers.sub %>% filter( month > '08' & month < '12')
+
+p <- ggplot(data = Yale.Myers.fall, aes(x = date , y = tmean)) + geom_point()
+
+p + facet_grid(month ~ .) +
+  labs(title = 'Climate of Yale Myers Forest',
+       x = "Date",
+       y = "Mean Air Temperature (Degrees Celcius)")
+
 ```
 
 # Statistics layer
 ggplot2 in R this layer, we transform our data using binning, smoothing, descriptive, intermediate
 ```{r, echo=TRUE}
-ggplot(data = mtcars, aes(x = hp, y = mpg)) +
-  geom_point() +
+
+# change in February temperatures
+Yale.Myers.feb <- Yale.Myers.sub %>% filter( month =='02')
+
+ggplot(data = Yale.Myers.fall, aes(x = date , y = tmean)) + geom_point() +
   stat_smooth(method = lm, col = "red") +
-  labs(title = "Miles per Gallon vs Horsepower")
+  labs(title = 'Climate of Yale Myers Forest')
+
 ```
 Coordinates layer:
 ggplot2 in R these layers, data coordinates are mapped together to the mentioned plane of the graphic and we adjust the axis and changes the spacing of displayed data with Control plot dimensions.
 
 ```{r, echo=TRUE}
-ggplot(data = mtcars, aes(x = wt, y = mpg)) +
-geom_point() +
-stat_smooth(method = lm, col = "red") +
-scale_y_continuous("Miles per Gallon", limits = c(2, 35), expand = c(0, 0)) +
-scale_x_continuous("Weight", limits = c(0, 25), expand = c(0, 0)) +
-coord_equal() +
-labs(title = "Miles per Gallon vs Weight",
-	x = "Weight",
-	y = "Miles per Gallon")
+ggplot(data = Yale.Myers.fall, aes(x = tmin , y = tmean)) + geom_point() +
+  stat_smooth(method = lm, col = "red") +
+  labs(title = 'Climate of Yale Myers Forest') +
+  scale_y_continuous(limits = c(-10, 40), expand = c(0, 0)) +
+  scale_x_continuous(limits = c(-10, 40), expand = c(0, 0)) +
+  coord_equal() +
+  labs(title = 'Climate of Yale Myers Forest')
+  
 	```
 Coord_cartesian() to proper zoom in:
 ```{r, echo=TRUE}
 # Add coord_cartesian() to proper zoom in
-ggplot(data = mtcars, aes(x = wt, y = hp, col = am)) +
-						geom_point() + geom_smooth() +
-						coord_cartesian(xlim = c(3, 6))
+ggplot(data = Yale.Myers.fall, aes(x = tmin , y = tmean)) + geom_point() +
+  stat_smooth(method = lm, col = "red") +
+  labs(title = 'Climate of Yale Myers Forest')  +
+						coord_cartesian(xlim = c(-10, 10))
 ```				
 						
 # Theme Layer:
 ggplot2 in R layer controls the finer points of display like the font size and background color properties.
 
-Example 1: Theme layer – element_rect() function
+Example: Theme layer – element_rect() function
 ```{r, echo=TRUE}
-ggplot(data = mtcars, aes(x = hp, y = mpg)) +
-geom_point() +
-facet_grid(. ~ cyl) +
-theme(plot.background = element_rect(fill = "blue", colour = "gray")) +
-labs(title = "Miles per Gallon vs Horsepower")
+
+ggplot(data = Yale.Myers.fall, aes(x = tmin , y = tmean)) + geom_point() +
+  stat_smooth(method = lm, col = "red") +
+  facet_grid(. ~ month) +
+  theme(plot.background = element_rect(fill = "blue", colour = "gray")) 
 ```
 
 
